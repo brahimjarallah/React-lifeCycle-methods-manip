@@ -1,136 +1,62 @@
-import { useState, useEffect } from "react"
-import { BrowserRouter as Router, Route } from "react-router-dom"
-import Header from "./components/Header"
-import Tasks from "./components/Tasks"
-import AddTask from "./components/AddTask"
-import Footer from "./components/Footer"
-import About from "./components/About"
+import React, { Component } from "react"
+import Counter from "./Counter"
+// import ReactDOM from 'react-dom'
 
-function App() {
-  //show addTask Form
-  const [showAddTask, setShowAddTask] = useState(false)
-
-  const [tasks, setTasks] = useState([])
-
-  useEffect(() => {
-    const getTasks = async () => {
-      const tasksFromServer = await fetchTasks()
-      setTasks(tasksFromServer)
+export default class App extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      mount: true,
+      ignoreProp: 0,
+      seed:40 ,
     }
-    getTasks()
-  }, [])
+    this.mountCounter = () => this.setState({ mount: true })
+    this.unmountCounter = () => this.setState({ mount: false })
+    this.generateSeed = () =>
+      this.setState({ seed: Number.parseInt(Math.random() * 100) })
 
-  //fetch tasks
-  const fetchTasks = async () => {
-    const res = await fetch("http://localhost:5000/tasks")
-    const data = await res.json()
-    // console.log(data);
-    return data
+    this.ignoreProp = () => this.setState({ ignoreProp: Math.random() })
   }
 
-  //fetch singular task
-  const fetchTask = async (id) => {
-    const res = await fetch(`http://localhost:5000/tasks/${id}`)
-    const data = await res.json()
-    // console.log(data);
-    return data
-  }
 
-  //add task
-  const addTask = async (task) => {
-    // const id = Math.floor(Math.random() * 10000) + 1
-    // const newTask = { id, ...task }
-    // setTasks([...tasks, newTask])
-
-    const res = await fetch("http://localhost:5000/tasks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(task),
-    })
-
-    const data = await res.json()
-    setTasks([...tasks, data])
-  }
-
-  //delete task
-  const deleteTask = async (id) => {
-    // console.log("delete ", id)
-    await fetch(`http://localhost:5000/tasks/${id}`, {
-      method: "DELETE",
-    })
-    setTasks(tasks.filter((task) => task.id !== id))
-  }
-
-  const toggleReminder = async (id) => {
-    //   setTasks(
-    // tasks.map((task) =>
-    //   task.id === id ? { ...task, reminder: !task.reminder } : task
-    //     )
-
-    const taskToToggle = await fetchTask(id)
-    const updTask = { ...taskToToggle, reminder: !taskToToggle.reminder }
-
-    const res = await fetch(`http://localhost:5000/tasks/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(updTask),
-    })
-    const data = await res.json()
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, reminder: data.reminder } : task
-      )
+  render() {
+    return (
+      <div>
+        <button
+          style={style.buttonStyle}
+          onClick={this.mountCounter}
+          disabled={this.state.mount}
+        >
+          Mount Counter
+        </button>
+        <button
+          style={style.buttonStyle}
+          onClick={this.unmountCounter}
+          disabled={!this.state.mount}
+        >
+          Unmount Counter
+        </button>
+        <button style={style.buttonStyle} onClick={this.ignoreProp}>
+          Ignore Prop
+        </button>
+        <button style={style.buttonStyle} onClick={this.generateSeed}>
+          generate Seed
+        </button>
+        {this.state.mount && (
+          <Counter ignoreProp={this.state.ignoreProp} seed={this.state.seed} />
+        )}
+      </div>
     )
   }
-
-  return (
-    <Router basename="/React-single-page-app-rest-api-routed">
-      <switch>
-        <div className="container">
-          <Header
-            onAdd={() => setShowAddTask(!showAddTask)}
-            title={"Task Tracker"}
-            showAdd={showAddTask}
-          />
-
-          <Route
-            path="/"
-            exact
-            render={(props) => (
-              <>
-                {showAddTask && <AddTask onAdd={addTask} />}
-                {/* <Tasks tasks={tasks} onDelete={deletTask} /> */}
-                {tasks.length > 0 ? (
-                  <Tasks
-                    tasks={tasks}
-                    onDelete={deleteTask}
-                    onToggle={toggleReminder}
-                  />
-                ) : (
-                  "No tasks to show !!!"
-                )}
-              </>
-            )}
-          />
-          <Route path="/about" component={About} />
-          <Footer />
-        </div>
-      </switch>
-    </Router>
-  )
 }
 
-// import React, { Component } from 'react'
-
-// class App extends Component {
-//   render() {
-//     return <h1>Hello form a class</h1>
-
-//   }
-// }
-
-export default App
+const style = {
+  buttonStyle: {
+    padding: "10px",
+    margin: "10px",
+    width: "130px",
+  },
+  counter: {
+    fontWeight: "bold",
+  },
+}
