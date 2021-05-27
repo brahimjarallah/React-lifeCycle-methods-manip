@@ -39,8 +39,6 @@ export default class Counter extends Component {
         console.log("should Component Update - RENDER")
         return true
     }
-
-    //capture some properties are not sotred in the state before rerendered that component later in snapshot parameter of componentDidUpdate
      
 
   render() {
